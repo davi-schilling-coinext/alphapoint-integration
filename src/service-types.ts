@@ -1,5 +1,10 @@
 import WebSocket from 'ws'
 
+export enum OrderTypes {
+  buyOrder = 'buyOrder',
+  sellOrder = 'sellOrder'
+}
+
 export type WSGatewayConstructor = {
   ws: WebSocket
   email: string

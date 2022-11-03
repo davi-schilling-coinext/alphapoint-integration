@@ -1,8 +1,21 @@
-import WebSocket from 'ws'
-import readlineSync from 'readline-sync'
-import crypto from 'crypto'
+import WebSocket from 'ws';
+import {
+  AddUserAPIKeyPayload,
+  Authenticate2FAPayload,
+  AuthenticateUserPayload,
+  BuyOrderPayload,
+  SellOrderPayload,
+  WebAuthenticateUserPayload
+} from './payloads';
 
-import { FrameType, ServicesPayloadTypes, UserAuthType, WSGatewayConstructor, WSGatewayServiceTypes } from './service-types'
+import {
+  FrameType,
+  OrderTypes,
+  ServicesPayloadTypes,
+  UserAuthType,
+  WSGatewayConstructor,
+  WSGatewayServiceTypes
+} from './service-types';
 
 class WSGateway {
   ws: WebSocket
@@ -16,10 +29,10 @@ class WSGateway {
     this.frame =  { m: 0, i: 2, n: '', o: '' }
 
     this.ws.onopen = () => {
-      this.wsSend(WSGatewayServiceTypes.WEB_AUTHENTICATE_USER, JSON.stringify({
-        UserName: this.user?.UserName,
-        Password: this.user?.Password
-      } as ServicesPayloadTypes.USERNAME_PASSWORD_AUTH))
+      this.wsSend(
+        WSGatewayServiceTypes.WEB_AUTHENTICATE_USER,
+        JSON.stringify(WebAuthenticateUserPayload(this.user))
+      )
     }
 
     this.ws.onmessage = (msg: any) => {
@@ -37,7 +50,7 @@ class WSGateway {
           break
         case WSGatewayServiceTypes.AUTHENTICATE_USER:
           this.handleAuthenticateUser(data)
-          this.handleService(service)
+          this.handleServices(service)
           this.ws.close()
           break
         default:
@@ -53,15 +66,14 @@ class WSGateway {
     if (!Requires2FA && Authenticated && this.user){
       this.user.SessionToken = SessionToken
       this.user.UserId = UserId
-      this.wsSend(WSGatewayServiceTypes.ADD_USER_API_KEY, JSON.stringify({
-        "UserId": Number(this.user?.UserId),
-        "Permissions": ["Trading"],
-        "aptoken": String(this.user?.SessionToken),
-      } as ServicesPayloadTypes.ADD_USER_API_KEY))
+      this.wsSend(
+        WSGatewayServiceTypes.ADD_USER_API_KEY,
+        JSON.stringify(AddUserAPIKeyPayload(this.user)))
     } else if (Authenticated) {
-      const code = readlineSync.question('Google auth code? ')
-      const payload: ServicesPayloadTypes.AUTHENTICATE_2FA = { Code: code }
-      this.wsSend(WSGatewayServiceTypes.AUTHENTICATE_2FA, JSON.stringify(payload))
+      this.wsSend(
+        WSGatewayServiceTypes.AUTHENTICATE_2FA,
+        JSON.stringify(Authenticate2FAPayload())
+      )
     }
   }
 
@@ -71,21 +83,15 @@ class WSGateway {
       this.user.SessionToken = SessionToken
       this.user.UserId = UserId
     }
-    this.wsSend(WSGatewayServiceTypes.ADD_USER_API_KEY, JSON.stringify({
-      "UserId": Number(this.user?.UserId),
-      "Permissions": ["Trading"],
-      "aptoken": String(this.user?.SessionToken),
-    } as ServicesPayloadTypes.ADD_USER_API_KEY))
+    this.wsSend(
+      WSGatewayServiceTypes.ADD_USER_API_KEY,
+      JSON.stringify(AddUserAPIKeyPayload(this.user))
+    )
   }
 
   handleAddUserAPIKey(data: any){
     if (!this.apiKeySecretPayload) {
-      const { APIKey, APISecret, UserId } = JSON.parse(data['o'])
-      const nonceValue = Date.now()
-      const userId = this.user ? this.user.UserId : UserId
-      const message = `${nonceValue}${userId}${APIKey}`
-      const Signature = crypto.createHmac('sha256', APISecret).update(message).digest('hex');
-      this.apiKeySecretPayload = { APIKey, Signature,  UserId: String(userId), Nonce: String(nonceValue) }
+      this.apiKeySecretPayload = AuthenticateUserPayload(this.user, data['o'])
       this.wsSend(WSGatewayServiceTypes.AUTHENTICATE_USER, JSON.stringify(this.apiKeySecretPayload))
     }
   }
@@ -95,23 +101,19 @@ class WSGateway {
     this.user.AccountId = User.AccountId
   }
 
-  async handleService(service: string){
+  async handleServices(service: string){
     switch(service){
-      case 'order':
-        const payload: ServicesPayloadTypes.SEND_ORDER = {
-          InstrumentId: 1,
-          OMSId: 1,
-          AccountId: Number(this.user.AccountId),
-          TimeInForce: 1,
-          ClientOrderId: 1,
-          OrderIdOCO: 0,
-          UseDisplayQuantity: false,
-          Side: 0,
-          quantity: 0.00001000,
-          OrderType: 1,
-          PegPriceType: 3
-        }
-        await this.wsSend(WSGatewayServiceTypes.SEND_ORDER, JSON.stringify(payload))
+      case OrderTypes.buyOrder:
+        await this.wsSend(
+          WSGatewayServiceTypes.SEND_ORDER,
+          JSON.stringify(BuyOrderPayload(this.user))
+        )
+        break
+      case OrderTypes.sellOrder:
+        await this.wsSend(
+          WSGatewayServiceTypes.SEND_ORDER,
+          JSON.stringify(SellOrderPayload(this.user))
+        )
         break
       default:
         break

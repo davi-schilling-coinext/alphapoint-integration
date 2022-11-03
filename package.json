@@ -6,8 +6,10 @@
   "scripts": {
     "alphapoint:simple-auth": "ts-node-dev --poll --transpile-only --ignore-watch node_modules --clear src auth-type=simple service=",
     "alphapoint:2fa-auth": "ts-node-dev --poll --transpile-only --ignore-watch node_modules --clear -r dotenv/config src auth-type=2fa service=",
-    "alphapoint:simple-auth-buying-order": "ts-node-dev --poll --transpile-only --ignore-watch node_modules --clear -r dotenv/config src auth-type=simple service=order",
-    "alphapoint:2fa-auth-buying-order": "ts-node-dev --poll --transpile-only --ignore-watch node_modules --clear -r dotenv/config src auth-type=2fa service=order"
+    "alphapoint:simple-auth-buy-order": "ts-node-dev --poll --transpile-only --ignore-watch node_modules --clear -r dotenv/config src auth-type=simple service=buyOrder",
+    "alphapoint:2fa-auth-buy-order": "ts-node-dev --poll --transpile-only --ignore-watch node_modules --clear -r dotenv/config src auth-type=2fa service=buyOrder",
+    "alphapoint:simple-auth-sell-order": "ts-node-dev --poll --transpile-only --ignore-watch node_modules --clear -r dotenv/config src auth-type=simple service=sellOrder",
+    "alphapoint:2fa-auth-sell-order": "ts-node-dev --poll --transpile-only --ignore-watch node_modules --clear -r dotenv/config src auth-type=2fa service=sellOrder"
   },
   "keywords": [],
   "author": "",

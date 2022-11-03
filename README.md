@@ -31,10 +31,10 @@ Used to test alphapoint endpoints with Websocket
 
 - Authenticate user without 2fa and send a Buying Order:
   ```bash
-  npm run alphapoint:simple-auth-buying-order
+  npm run alphapoint:simple-auth-buy-order
   ```
 
 - Authenticate user using 2fa and send a Buying Order:
   ```bash
-  npm run alphapoint:2fa-auth-buying-order
+  npm run alphapoint:2fa-auth-buy-order
   ```
