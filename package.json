@@ -6,7 +6,8 @@
   "scripts": {
     "alphapoint:simple-auth": "ts-node-dev --poll --transpile-only --ignore-watch node_modules --clear src auth-type=simple service=",
     "alphapoint:2fa-auth": "ts-node-dev --poll --transpile-only --ignore-watch node_modules --clear -r dotenv/config src auth-type=2fa service=",
-    "alphapoint:order": "ts-node-dev --poll --transpile-only --ignore-watch node_modules --clear -r dotenv/config src auth-type=2fa service=order"
+    "alphapoint:simple-auth-buying-order": "ts-node-dev --poll --transpile-only --ignore-watch node_modules --clear -r dotenv/config src auth-type=simple service=order",
+    "alphapoint:2fa-auth-buying-order": "ts-node-dev --poll --transpile-only --ignore-watch node_modules --clear -r dotenv/config src auth-type=2fa service=order"
   },
   "keywords": [],
   "author": "",
